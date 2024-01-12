@@ -1,10 +1,10 @@
-
 const SELECTORS = {
     MOBILE_MENU: '.mobile-menu',
     CART_COUNT: '#cartCount',
     CART_SECTION: '#cartSection',
     MAKE_RESERVATION_BTN: '#makeReservationBtn',
     CLEAR_ALL_BTN: '#clearAllBtn',
+    RESERVED_BOOKS_LIST: '#reservedBooksList',
 };
 
 const reservedBooksKey = 'reservedBooks';
@@ -14,14 +14,15 @@ const cartCountElement = document.querySelector(SELECTORS.CART_COUNT);
 const cartSection = document.querySelector(SELECTORS.CART_SECTION);
 const makeReservationBtn = document.querySelector(SELECTORS.MAKE_RESERVATION_BTN);
 const clearAllBtn = document.querySelector(SELECTORS.CLEAR_ALL_BTN);
-
+const reservedBooksList = document.querySelector(SELECTORS.RESERVED_BOOKS_LIST);
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeCartCount();
     setupEventListeners();
     updateCartSection();
-
+    
 });
+
 
 function setupEventListeners() {
     cartSection.addEventListener('change', handleQuantityChange);
@@ -49,9 +50,84 @@ function handleQuantityChange(event) {
     }
 }
 
-function getReturnDate() {
-    return document.getElementById('returnDate').value;
-}
+// function confirmReservation() {
+//     const reservedBooks = getReservedBooks();
+//     const returnDate = getReturnDate();
+
+//     if (!returnDate) {
+//         alert('Please select a return date.');
+//         return;
+//     }
+
+//     if (reservedBooks.length > 0) {
+//         const groupedBooks = groupBooksByTitle(reservedBooks);
+//         const booksWithQuantity = Object.entries(groupedBooks).map(([title, quantity]) => ({
+//             bookId: reservedBooks.find(book => book.title === title).id,
+//             description: `${title} (${quantity} books)`, // Include quantity in the description
+//             quantity: quantity,
+//         }));
+
+//         // Make an AJAX request to store reservation data in the database
+//         fetch('/reservations', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify({ reservedBooks: booksWithQuantity, returnDate }),
+//         })
+//         .then(response => response.json())
+//         .then(data => {
+//             if (data.status) {
+//                 alert('Reservation successful!');
+//                 clearReservedBooks();
+//                 updateCartSection();
+//                 window.location.href = '/Gestion_Bibliotheque/Views/User/books.php';
+//             } else {
+//                 alert('Reservation failed. Please try again.');
+//             }
+//         })
+//         .catch(() => {
+//             alert('Reservation failed. Please try again.');
+//         });
+//     } else {
+//         alert('No books are reserved.');
+//     }
+// }
+
+// function confirmReservation() {
+//     var reservedBooks = JSON.parse(sessionStorage.getItem('reservedBooks') || '[]');
+//     var returnDate = document.getElementById('returnDate').value;
+
+//     $.ajax({
+//         url: '{{ route("reservations.store") }}', // Assuming your route is named "reservations.store"
+//         type: 'POST',
+//         data: {
+//             reservedBooks: reservedBooks,
+//             returnDate: returnDate,
+//             _token: '{{ csrf_token() }}',
+//         },
+//         success: function (response) {
+//             console.log(response);
+//             // Optionally, update the UI or perform other actions here
+//             if (response.status) {
+//                 alert('Reservation successful');
+//                 // Optionally, close the modal or redirect to another page
+//                 $('#cartModal').modal('hide');
+//             } else {
+//                 alert('Reservation failed: ' + response.message);
+//             }
+//         },
+//         error: function (error) {
+//             console.log(error);
+//             alert('Reservation failed. Please try again.');
+//         }
+//     });
+// }
+
+// $(document).ready(function () {
+//     $('#confirmReservationBtn').on('click', confirmReservation);
+// });
+
 
 function makeReservation() {
     const reservedBooks = getReservedBooks();
@@ -65,12 +141,12 @@ function makeReservation() {
     if (reservedBooks.length > 0) {
         const groupedBooks = groupBooksByTitle(reservedBooks);
         const booksWithQuantity = Object.entries(groupedBooks).map(([title, quantity]) => ({
-            bookId: reservedBooks.find(book => book.title === title).id, // Assuming each book has an 'id' property
-            description: title, // Assuming the title is used as a description
-            quantity: quantity
+            bookId: reservedBooks.find(book => book.title === title).id,
+            description: title,
+            quantity: quantity,
         }));
         sendReservationToServer(booksWithQuantity, returnDate)
-        .then(response => {
+            .then(response => {
                 if (response.status) {
                     alert('Reservation successful!');
                     clearReservedBooks();
@@ -79,7 +155,6 @@ function makeReservation() {
                 } else {
                     alert('Reservation failed. Please try again.');
                 }
-
             })
             .catch(() => {
                 alert('Reservation failed. Please try again.');
@@ -89,9 +164,7 @@ function makeReservation() {
     }
 }
 
-
 function sendReservationToServer(reservedBooks, returnDate) {
-
     const booksWithQuantity = reservedBooks.map(book => ({ ...book, quantity: book.quantity }));
     return fetch('/Gestion_Bibliotheque/app/Controllers/ReservationController/ReservationController.php', {
         method: 'POST',
@@ -119,16 +192,55 @@ function reserveBook(book) {
 function updateCartSection() {
     const reservedBooks = getReservedBooks();
     updateCartCount(reservedBooks.length);
+    reservedBooksList.innerHTML = '';
 
     const groupedBooks = groupBooksByTitle(reservedBooks);
 
-    cartSection.innerHTML = '';
-
     Object.keys(groupedBooks).forEach(title => {
         const bookDiv = createBookDiv(title, groupedBooks[title]);
-        cartSection.appendChild(bookDiv);
+        reservedBooksList.appendChild(bookDiv);
+    });
+
+    // Reinitialize date-time picker
+    initDateTimePicker();
+}
+
+function initDateTimePicker() {
+    const returnDateInput = $('#returnDate');
+
+    // Check if the datepicker is already initialized
+    if (returnDateInput.data('datepicker')) {
+        // Destroy the existing datepicker to reinitialize with new options
+        returnDateInput.datepicker('destroy');
+    }
+
+    returnDateInput.datepicker({
+        format: 'dd-mm-yyyy', // Use 'dd-mm-yyyy' for numeric format
+        startDate: new Date(),
+        endDate: '+20d',
+        autoclose: true,
+    });
+
+    // Trigger date picker when clicking the icon
+    $('#returnDateIcon').click(function () {
+        returnDateInput.datepicker('show');
+    });
+
+    // Prevent direct text input in the date field
+    returnDateInput.on('keydown paste', function (e) {
+        e.preventDefault();
+    });
+
+    // Update the input value in 'YYYY-MM-DD' format when a date is selected
+    returnDateInput.on('changeDate', function (e) {
+        const selectedDate = e.format('YYYY-MM-DD');
+        returnDateInput.val(selectedDate);
     });
 }
+
+
+
+
 
 function createBookDiv(title, quantity) {
     const bookDiv = document.createElement('div');
@@ -150,12 +262,18 @@ function createBookDiv(title, quantity) {
     cardTitle.classList.add('card-title');
     cardTitle.textContent = title;
 
+    const bookImage = document.createElement('img');
+    bookImage.classList.add('card-img-top');
+    bookImage.setAttribute('src', 'path/to/your/book/image.jpg');
+    bookImage.setAttribute('alt', 'Book Image');
+
     const cardText = document.createElement('p');
     cardText.classList.add('card-text');
     cardText.textContent = `Quantity: ${quantity}`;
 
     cardBody.appendChild(closeButton);
     cardBody.appendChild(cardTitle);
+    cardBody.appendChild(bookImage);
     cardBody.appendChild(cardText);
     card.appendChild(cardBody);
     bookDiv.appendChild(card);
@@ -171,15 +289,15 @@ function groupBooksByTitle(books) {
 }
 
 function getReservedBooks() {
-    return JSON.parse(sessionStorage.getItem(reservedBooksKey)) || [];
+    return JSON.parse(localStorage.getItem(reservedBooksKey)) || [];
 }
 
 function updateReservedBooksInStorage(reservedBooks) {
-    sessionStorage.setItem(reservedBooksKey, JSON.stringify(reservedBooks));
+    localStorage.setItem(reservedBooksKey, JSON.stringify(reservedBooks));
 }
 
 function clearReservedBooks() {
-    sessionStorage.removeItem(reservedBooksKey);
+    localStorage.removeItem(reservedBooksKey);
 }
 
 function updateCartCount(count) {
@@ -201,5 +319,5 @@ function removeReservedBook(title) {
     }
 }
 
-
-
+// Call updateCartCount on page load to initialize the cart count
+// updateCartCount();

@@ -33,6 +33,12 @@ class DashboardController extends Controller
         return view('dashboard.dashreserve', ['reservations' => $reservations]);
     }
 
+    public function userhome()
+{
+    $books = Book::all();
+    return view('userhome', ['books' => $books]);
+}
+
     public function back()
     {
         return $this->index();

@@ -115,19 +115,23 @@
             </div>
         </div>
     </header>
-    <!-- About-->
-    <section class="page-section " id="about" style="background-color: #C66D28;">
-        <div class="container px-4 px-lg-5">
-            <div class="row gx-4 gx-lg-5 justify-content-center">
-                <div class="col-lg-8 text-center">
-                    <h2 class="text-white mt-0">We've got what you need!</h2>
-                    <hr class="divider divider-light" />
-                    <p class="text-white-75 mb-4">Dive into our curated collection of literary treasures—bestsellers, classics, and hidden gems await. Ready to embark on your next reading adventure? Reserve or buy your favorite book today and let the pages transport you to new worlds!</p>
-                    <a class="btn btn-light btn-xl" href="#services">Get Started!</a>
-                </div>
+    <!-- About -->
+<section class="page-section" id="about" style="background-color: #C66D28;">
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="text-white mt-0">We've got what you need!</h2>
+                <hr class="divider divider-light" />
+                <p class="text-white-75 mb-4">
+                    Dive into our curated collection of literary treasures—bestsellers, classics, and hidden gems await. Ready to embark on your next reading adventure? Reserve or buy your favorite book today and let the pages transport you to new worlds!
+                </p>
+                <a class="btn btn-light btn-xl" href="{{ url('/userhome') }}">Get Started!</a>
+
             </div>
         </div>
-    </section>
+    </div>
+</section>
+
     <!-- Services-->
     <section class="page-section" id="services">
         <div class="container px-4 px-lg-5">

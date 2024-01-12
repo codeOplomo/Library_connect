@@ -40,6 +40,16 @@ Route::get('/dashbook', [DashboardController::class, 'bookDashboard'])->name('da
 Route::get('/dashreserve', [DashboardController::class, 'reserveDashboard'])->name('dashreservation');
 Route::get('/dash/back', [DashboardController::class, 'back'])->name('dash.back');
 
+Route::get('/userhome', [DashboardController::class, 'userhome']);
+
+ // Add a semicolon here
+
+
+// Route::get('/userhome', function () {
+//     return view('userhome');
+// })->name('userhome');
+
+
 // Route::get('/reservations/create', [ReservationController::class, 'create'])->name('reservations.create');
 
 

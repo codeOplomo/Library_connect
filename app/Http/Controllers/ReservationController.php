@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservation;
+use App\Models\Book;
 use Illuminate\Http\Request;
+    use Illuminate\Support\Facades\Validator;
 
 class ReservationController extends Controller
 {
@@ -18,26 +20,84 @@ class ReservationController extends Controller
         return view('reservations.create');
     }
 
+    // public function store(Request $request)
+    // {
+    //     $data = $request->validate([
+    //         'reservedBooks' => 'required|array',
+    //         'reservedBooks.*.bookId' => 'required|exists:books,id',
+    //         'reservedBooks.*.description' => 'required|string',
+    //         'reservedBooks.*.quantity' => 'required|integer|min:1',
+    //         'returnDate' => 'required|date',
+    //     ]);
+
+    //     foreach ($data['reservedBooks'] as $reservationData) {
+    //         $reservation = new Reservation([
+    //             'description' => $reservationData['description'],
+    //             'reservation_date' => now(),
+    //             'return_date' => $data['returnDate'],
+    //             'is_returned' => false,
+    //             'user_id' => auth()->user()->id, // Assuming you are using authentication
+    //             'book_id' => $reservationData['bookId'],
+    //         ]);
+
+    //         $reservation->save();
+
+    //         // Decrement available copies in the books table
+    //         $book = Book::find($reservationData['bookId']);
+    //         $book->decrement('available_copies', $reservationData['quantity']);
+    //     }
+
+    //     return response()->json(['status' => true]);
+    // }
+
+
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'book_id' => 'required|exists:books,id',
-            'reservation_date' => 'required',
-            'return_date' => 'required',
-            'is_returned' => 'required',
-        ]);
-
-        Reservation::create([
-            'user_id' => $request->input('user_id'),
-            'book_id' => $request->input('book_id'),
-            'reservation_date' => $request->input('reservation_date'),
-            'return_date' => $request->input('return_date'),
-            'is_returned' => $request->input('is_returned'),
-        ]);
-
-        return redirect()->route('reservations.index')->with('success', 'Reservation created successfully');
+        try {
+            // Validate the request data
+            $validator = Validator::make($request->all(), [
+                'reservedBooks' => 'required',
+                'reservedBooks.*.bookId' => 'required',
+                'reservedBooks.*.description' => 'required|string',
+                'reservedBooks.*.quantity' => 'required',
+                'returnDate' => 'required|date',
+            ]);
+    
+            // If validation fails, return an error response
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => 'Validation failed', 'errors' => $validator->errors()], 400);
+            }
+    
+            // Retrieve authenticated user ID
+            // $userId = auth()->user()->id;
+            $userId = 3;
+    
+            // Process reservation and decrement available copies
+            foreach ($request->input('reservedBooks') as $reservationData) {
+                $reservation = new Reservation([
+                    'description' => $reservationData['description'],
+                    'reservation_date' => now(),
+                    'return_date' => $request->input('returnDate'),
+                    'is_returned' => false,
+                    'user_id' => $userId,
+                    'book_id' => $reservationData['bookId'],
+                ]);
+    
+                $reservation->save();
+    
+                // Decrement available copies in the books table
+                $book = Book::find($reservationData['bookId']);
+                $book->decrement('available_copies', $reservationData['quantity']);
+            }
+    
+            // If successful, return a success response
+            return response()->json(['status' => true, 'message' => 'Reservation successful']);
+        } catch (\Exception $e) {
+            // If an exception occurs, return an error response
+            return response()->json(['status' => false, 'message' => 'Reservation failed', 'error' => $e->getMessage()], 500);
+        }
     }
+
 
     public function show(Reservation $reservation)
     {
