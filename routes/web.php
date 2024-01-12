@@ -18,6 +18,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\LoginController;
 
 
 
@@ -25,12 +27,21 @@ Route::get('/', function () {
     return view('index');
 });
 
+Route::post('/reservations/ajax', [ReservationController::class, 'storeViaAjax']);
 Route::resource('users', UserController::class);
 Route::resource('books', BookController::class);
 Route::resource('reservations', ReservationController::class);
 
 
-// Route::get('/books/{book}/edit', [BookController::class, 'edit'])->name('books.edit');
+
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
+
+
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
 
 Route::get("/user", [UserController::class, "index"]);
 Route::get("/reservation", [ReservationController::class, "index"]);
@@ -42,7 +53,6 @@ Route::get('/dash/back', [DashboardController::class, 'back'])->name('dash.back'
 
 Route::get('/userhome', [DashboardController::class, 'userhome']);
 
- // Add a semicolon here
 
 
 // Route::get('/userhome', function () {
@@ -50,18 +60,8 @@ Route::get('/userhome', [DashboardController::class, 'userhome']);
 // })->name('userhome');
 
 
-// Route::get('/reservations/create', [ReservationController::class, 'create'])->name('reservations.create');
-
-
-
-
-
 // Route::get('/dash/back', function () {
 //     return redirect()->back();
 // })->name('dash.back');
 
 
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

@@ -1,39 +1,52 @@
 <?php
 
+// app/Http/Controllers/Auth/LoginController.php
+
 namespace App\Http\Controllers\Auth;
 
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\Session; // Import the Session facade
+use Illuminate\Support\Facades\Auth; // Import the Auth facade
+
+
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
     use AuthenticatesUsers;
 
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/';
+    protected $redirectTo = '/userhome'; // Change the redirect path as needed
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
     }
+
+    // Show the login form
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+
+
+
+  // Handle the login POST request
+  public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+        session()->flash('success', 'Login successful'); 
+        return redirect('/userhome')->with('success', 'Login successful'); 
+    } else {
+        session()->flash('error', 'Invalid credentials'); 
+        return back()->withErrors(['email' => 'Invalid credentials']);
+    }
+}
+
+  
 }

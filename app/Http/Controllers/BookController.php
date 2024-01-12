@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Database\Eloquent\Collection;
+
 
 class BookController extends Controller
 {
@@ -12,9 +15,11 @@ class BookController extends Controller
      */
     public function index()
     {
+
         $books = Book::all();
         return view('dashboard.dashbook', compact('books'));
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -29,37 +34,37 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        
-    $request->validate([
-        'title' => 'required|string',
-        'author' => 'required|string',
-        'type' => 'required|string',
-        'description' => 'required|string',
-        'image' => 'required|image',
-        'publication_year' => 'required',
-        'available_copies' => 'required',
-        'total_copies' => 'required',
-    ]);
 
-    // Handle image upload
-    $imagePath = $request->file('image')->store('images', 'public');
+        $request->validate([
+            'title' => 'required|string',
+            'author' => 'required|string',
+            'type' => 'required|string',
+            'description' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+            'publication_year' => 'required',
+            'available_copies' => 'required',
+            'total_copies' => 'required',
+        ]);
 
-    // Use only the relative path for the image attribute
-    $imagePath = str_replace('public/', '', $imagePath);
+        // Handle image upload
+        $imagePath = $request->file('image')->store('images', 'public');
 
-    Book::create([
-        'title' => $request->input('title'),
-        'author' => $request->input('author'),
-        'type' => $request->input('type'),
-        'description' => $request->input('description'),
-        'image' => $imagePath,
-        'publication_year' => $request->input('publication_year'),
-        'available_copies' => $request->input('available_copies'),
-        'total_copies' => $request->input('total_copies'),
-    ]);
+        // Use only the relative path for the image attribute
+        $imagePath = str_replace('public/', '', $imagePath);
 
-    
-    return redirect()->route('dashbook')->with('success', 'Book created successfully');
+        Book::create([
+            'title' => $request->input('title'),
+            'author' => $request->input('author'),
+            'type' => $request->input('type'),
+            'description' => $request->input('description'),
+            'image' => $imagePath,
+            'publication_year' => $request->input('publication_year'),
+            'available_copies' => $request->input('available_copies'),
+            'total_copies' => $request->input('total_copies'),
+        ]);
+
+
+        return redirect()->route('dashbook')->with('success', 'Book created successfully');
     }
 
     /**
@@ -76,7 +81,7 @@ class BookController extends Controller
     public function edit($id)
     {
         $book = Book::findOrFail($id); // Retrieve book by ID
-    return view('books.edit', compact('book'));
+        return view('books.edit', compact('book'));
     }
 
     /**
@@ -123,6 +128,7 @@ class BookController extends Controller
         $book->delete();
         return redirect()->route('books.index')->with('success', 'Book deleted successfully');
     }
+    
 }
 
 

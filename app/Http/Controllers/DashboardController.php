@@ -35,9 +35,10 @@ class DashboardController extends Controller
 
     public function userhome()
 {
-    $books = Book::all();
-    return view('userhome', ['books' => $books]);
+    $books = Book::paginate(9);
+    return view('userhome',compact('books'));
 }
+
 
     public function back()
     {
