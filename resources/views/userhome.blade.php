@@ -24,7 +24,8 @@
     <link rel="stylesheet" href="datetimepicker/css/bootstrap-datetimepicker.css">
     <!-- Propeller Date-Time Picker CSS -->
     <link rel="stylesheet" href="datetimepicker/css/pmd-datetimepicker.css">
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
         .book-card:hover {
@@ -129,43 +130,6 @@
 
 
     <!-- Main Content -->
-    {{-- <div class="container mt-5">
-    <h1 class="text-center mb-4">Library Book Catalog</h1>
-    <div class="row">
-        @foreach ($books as $book)
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 book-card">
-                    <img class="card-img-top" src="{{ $book->image_link }}" alt="{{ $book->title }}">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $book->title }}</h5>
-                        <p class="card-text">{{ $book->description }}</p>
-                        <p>Author: {{ $book->author }}</p>
-                        <p>Genre: {{ $book->genre }}</p>
-                        <p>Publication Year: {{ $book->publication_year }}</p>
-                        @if ($book->available_copies > 1)
-                            <p>Available Copies: {{ $book->available_copies }}</p>
-                        @endif
-                    </div>
-                    <div class="card-footer">
-                        @if ($book->available_copies < 1)
-                            <button type="hidden" class="btn btn-primary disabled">Reserve it</button>
-                        @else
-                            <button onclick="reserveBook({{ json_encode($book) }})" class="btn btn-primary">Reserve it</button>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        @endforeach
-    </div>
-    <!-- Add pagination links below the book cards -->
-    <div class="d-flex justify-content-center">
-        {{ $books->links() }}
-    </div>
-</div> --}}
-
-
-
-    <!-- Main Content -->
     <div class="container mt-5">
         <h1 class="text-center mb-4">Library Book Catalog</h1>
         <div class="row">
@@ -265,6 +229,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
     <!-- Your custom script -->
     <script src="{{ asset('js/script.js') }}"></script>
+
+    <script>
+        
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session('success'))
+            swal("Success!", "{{ session('success') }}", "success");
+        @endif
+
+        @if(session('error'))
+            swal("Error!", "{{ session('error') }}", "error");
+        @endif
+    });
+    </script>
 
 </body>
 
